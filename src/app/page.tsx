@@ -1,9 +1,11 @@
 
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, UserX, BarChartBig, Bell, AlertCircle } from "lucide-react";
-import Image from "next/image";
+import { ShieldAlert, UserX, BarChartBig, Bell, AlertCircle, Network } from "lucide-react";
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const recentActivities = [
   { id: "1", time: "10:45 AM", event: "Unusual login attempt from IP 192.168.1.100", severity: "High", icon: <UserX className="h-4 w-4 text-destructive" /> },
@@ -17,6 +19,12 @@ const overviewStats = [
     { title: "Critical Threats", value: "3", icon: <ShieldAlert className="h-6 w-6 text-destructive" />, change: "+1", changeType: "negative" as "positive" | "negative" },
     { title: "Failed Logins", value: "27", icon: <UserX className="h-6 w-6 text-yellow-600" />, change: "-10%", changeType: "negative" as "positive" | "negative"},
     { title: "Anomalies Detected", value: "2", icon: <BarChartBig className="h-6 w-6 text-purple-500" />, change: "0", changeType: "positive" as "positive" | "negative"},
+];
+
+const networkHealthData = [
+  { name: 'Normal Traffic', value: 4000, fill: 'hsl(var(--chart-2))' },
+  { name: 'Suspicious Activity', value: 300, fill: 'hsl(var(--chart-4))' },
+  { name: 'Blocked Threats', value: 150, fill: 'hsl(var(--destructive))' },
 ];
 
 
@@ -83,19 +91,34 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg" data-ai-hint="network security">
+        <Card className="shadow-lg" data-ai-hint="network chart">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Image src="https://placehold.co/64x64.png" alt="Network Health" width={32} height={32} className="rounded" data-ai-hint="network security" />
+                    <Network className="h-6 w-6 text-primary" />
                     Network Health Overview
                 </CardTitle>
                 <CardDescription>Visual representation of network traffic and potential threats.</CardDescription>
             </CardHeader>
-            <CardContent className="flex justify-center items-center">
-                 <Image src="https://placehold.co/400x250.png" alt="Network Graph Placeholder" width={400} height={250} className="rounded-md shadow-md" data-ai-hint="network graph" />
+            <CardContent className="pt-0 h-[280px] md:h-[250px]">
+                 <ResponsiveContainer width="100%" height="100%">
+                   <RechartsBarChart data={networkHealthData} margin={{ top: 20, right: 10, left: -25, bottom: 5 }}>
+                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                     <XAxis dataKey="name" stroke="hsl(var(--foreground))" fontSize={10} tickLine={false} axisLine={false} interval={0} angle={-30} textAnchor="end" height={50} />
+                     <YAxis stroke="hsl(var(--foreground))" fontSize={10} tickLine={false} axisLine={false} />
+                     <Tooltip
+                       wrapperStyle={{ outline: "none" }}
+                       contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)', padding: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'}}
+                       labelStyle={{ color: 'hsl(var(--foreground))', marginBottom: '4px', fontSize: '12px', fontWeight: '600' }}
+                       itemStyle={{ color: 'hsl(var(--foreground))', fontSize: '11px' }}
+                       cursor={{fill: 'hsl(var(--muted))'}}
+                     />
+                     <Bar dataKey="value" name="Events" radius={[4, 4, 0, 0]} />
+                   </RechartsBarChart>
+                 </ResponsiveContainer>
             </CardContent>
         </Card>
       </div>
     </div>
   );
 }
+
