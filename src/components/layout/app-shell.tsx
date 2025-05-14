@@ -1,6 +1,7 @@
 
 "use client";
 import type { ReactNode } from "react";
+import { useState, useEffect } from "react"; // Added useState and useEffect
 import {
   SidebarProvider,
   Sidebar,
@@ -19,14 +20,36 @@ interface AppShellProps {
   children: ReactNode;
 }
 
+const SIDEBAR_COOKIE_NAME = "sidebar_state"; // Used to read the cookie
+
 export function AppShell({ children }: AppShellProps) {
-  // Get the initial state from cookies or localStorage if available
-  // For simplicity, defaulting to true. In a real app, persist this.
-  const defaultOpen = typeof window !== 'undefined' ? document.cookie.includes("sidebar_state=true") : true;
+  // Initialize sidebar state to be consistent for server and initial client render.
+  // Defaulting to 'true' (expanded) as the server-side logic previously did.
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [hasMounted, setHasMounted] = useState(false);
 
+  useEffect(() => {
+    setHasMounted(true); // Indicate that the component has mounted on the client.
+    
+    // On the client, after mounting, read the sidebar state from the cookie.
+    const cookieValue = document.cookie
+      .split('; ')
+      .find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`))
+      ?.split('=')[1];
 
+    if (cookieValue !== undefined) {
+      setIsSidebarOpen(cookieValue === 'true');
+    }
+    // If the cookie isn't set, isSidebarOpen remains its initial value (true).
+  }, []);
+
+  // For SSR and the initial client render (before useEffect runs and hasMounted is true),
+  // isSidebarOpen is 'true'. This ensures consistency.
+  // After mounting, isSidebarOpen will reflect the cookie's value.
+  // We pass 'isSidebarOpen' to the 'open' prop to control SidebarProvider.
+  // 'onOpenChange' allows SidebarProvider to update AppShell's state.
   return (
-    <SidebarProvider defaultOpen={defaultOpen} open={defaultOpen}>
+    <SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
       <SidebarDocs>{children}</SidebarDocs>
     </SidebarProvider>
   );
@@ -34,7 +57,7 @@ export function AppShell({ children }: AppShellProps) {
 
 
 function SidebarDocs({ children }: AppShellProps) {
-  const { open } = useSidebar()
+  const { open } = useSidebar(); // 'open' is now derived from the controlled SidebarProvider
   return (
     <>
       <Sidebar variant="sidebar" collapsible="icon" side="left">
