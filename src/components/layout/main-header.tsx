@@ -11,8 +11,6 @@ export function MainHeader() {
 
   if (pathname === "/firewall") {
     pageTitle = "Firewall Configuration";
-  } else if (pathname === "/anomalies") {
-    pageTitle = "Anomaly Detection";
   } else if (pathname !== "/") {
      // Basic logic to get title from path
     const segments = pathname.split("/").filter(Boolean);
@@ -32,9 +30,3 @@ export function MainHeader() {
     </header>
   );
 }
-
-// Helper function, move to utils if used elsewhere
-// export function capitalize(str: string): string {
-//   if (!str) return "";
-//   return str.charAt(0).toUpperCase() + str.slice(1);
-// }

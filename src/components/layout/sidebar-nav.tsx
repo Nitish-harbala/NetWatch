@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ShieldCheck, AlertTriangle, BarChartBig } from "lucide-react";
+import { LayoutDashboard, ShieldCheck } from "lucide-react"; // Removed BarChartBig
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/firewall", label: "Firewall", icon: ShieldCheck },
-  { href: "/anomalies", label: "Anomalies", icon: BarChartBig },
+  // { href: "/anomalies", label: "Anomalies", icon: BarChartBig }, // Removed Anomalies link
 ];
 
 export function SidebarNav() {
