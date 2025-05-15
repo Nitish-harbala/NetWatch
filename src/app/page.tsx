@@ -47,19 +47,23 @@ const MAX_ACTIVITIES = 10;
 export default function DashboardPage() {
   const [recentActivities, setRecentActivities] = useState<Activity[]>(initialActivities);
   const [networkHealthData, setNetworkHealthData] = useState<NetworkHealthItem[]>(initialNetworkHealthData);
-  const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  const [currentTime, setCurrentTime] = useState<string | null>(null);
 
 
   useEffect(() => {
+    // Set initial time on client mount
+    const now = new Date();
+    setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+
     const activityIntervalId = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      const currentTickTime = new Date();
+      setCurrentTime(currentTickTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       const randomOctet = () => Math.floor(Math.random() * 254) + 1;
       const randomIP = `192.168.${randomOctet()}.${randomOctet()}`;
       
       const newLoginEvent: Activity = {
-        id: `evt${now.getTime()}`,
-        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        id: `evt${currentTickTime.getTime()}`,
+        time: currentTickTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         event: `New successful login from IP ${randomIP}`,
         severity: "Info",
         icon: <LogIn className="h-4 w-4 text-green-500" />
@@ -128,7 +132,10 @@ export default function DashboardPage() {
               <Bell className="h-6 w-6 text-primary" />
               Recent Security Activity
             </CardTitle>
-            <CardDescription>Latest security events and alerts from your network. Updates simulate live events. Current time: {currentTime}</CardDescription>
+            <CardDescription>
+              Latest security events and alerts from your network. Updates simulate live events. 
+              {currentTime ? ` Current time: ${currentTime}` : ' Loading time...'}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -199,5 +206,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
