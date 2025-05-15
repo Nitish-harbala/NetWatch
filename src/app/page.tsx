@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, UserX, BarChartBig, Bell, AlertCircle, Network,LogIn } from "lucide-react";
+import { ShieldAlert, UserX, BarChartBig, Bell, AlertCircle, Network, LogIn } from "lucide-react";
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Activity {
@@ -14,6 +14,12 @@ interface Activity {
   event: string;
   severity: "High" | "Medium" | "Low" | "Info";
   icon: JSX.Element;
+}
+
+interface NetworkHealthItem {
+  name: string;
+  value: number;
+  fill: string;
 }
 
 const initialActivities: Activity[] = [
@@ -30,20 +36,24 @@ const overviewStats = [
     { title: "Anomalies Detected", value: "2", icon: <BarChartBig className="h-6 w-6 text-purple-500" />, change: "0", changeType: "positive" as "positive" | "negative"},
 ];
 
-const networkHealthData = [
+const initialNetworkHealthData: NetworkHealthItem[] = [
   { name: 'Normal Traffic', value: 4000, fill: 'hsl(var(--chart-2))' },
   { name: 'Suspicious Activity', value: 300, fill: 'hsl(var(--chart-4))' },
   { name: 'Blocked Threats', value: 150, fill: 'hsl(var(--destructive))' },
 ];
 
-const MAX_ACTIVITIES = 10; // Keep the list to a manageable size
+const MAX_ACTIVITIES = 10;
 
 export default function DashboardPage() {
   const [recentActivities, setRecentActivities] = useState<Activity[]>(initialActivities);
+  const [networkHealthData, setNetworkHealthData] = useState<NetworkHealthItem[]>(initialNetworkHealthData);
+  const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    const activityIntervalId = setInterval(() => {
       const now = new Date();
+      setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       const randomOctet = () => Math.floor(Math.random() * 254) + 1;
       const randomIP = `192.168.${randomOctet()}.${randomOctet()}`;
       
@@ -62,8 +72,31 @@ export default function DashboardPage() {
 
     }, 5000); // Add a new event every 5 seconds
 
-    return () => clearInterval(intervalId); // Clean up on component unmount
+    return () => clearInterval(activityIntervalId);
   }, []);
+
+
+  useEffect(() => {
+    const healthDataIntervalId = setInterval(() => {
+      setNetworkHealthData(prevData => 
+        prevData.map(item => {
+          let newValue = item.value;
+          const fluctuation = Math.random() * (item.value * 0.1); // Fluctuate by up to 10%
+          if (item.name === 'Normal Traffic') {
+            newValue = Math.max(2000, item.value + (Math.random() > 0.5 ? fluctuation : -fluctuation));
+          } else if (item.name === 'Suspicious Activity') {
+            newValue = Math.max(50, item.value + (Math.random() > 0.5 ? fluctuation / 2 : -fluctuation / 2));
+          } else if (item.name === 'Blocked Threats') {
+            newValue = Math.max(20, item.value + (Math.random() > 0.5 ? fluctuation / 3 : -fluctuation / 3));
+          }
+          return { ...item, value: Math.round(newValue) };
+        })
+      );
+    }, 3000); // Update chart data every 3 seconds
+
+    return () => clearInterval(healthDataIntervalId);
+  }, []);
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -95,7 +128,7 @@ export default function DashboardPage() {
               <Bell className="h-6 w-6 text-primary" />
               Recent Security Activity
             </CardTitle>
-            <CardDescription>Latest security events and alerts from your network. Updates simulate live events.</CardDescription>
+            <CardDescription>Latest security events and alerts from your network. Updates simulate live events. Current time: {currentTime}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -136,13 +169,13 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg" data-ai-hint="network chart">
+        <Card className="shadow-lg" data-ai-hint="network chart dynamic">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Network className="h-6 w-6 text-primary" />
                     Network Health Overview
                 </CardTitle>
-                <CardDescription>Visual representation of network traffic and potential threats.</CardDescription>
+                <CardDescription>Visual representation of network traffic and potential threats. Updates dynamically.</CardDescription>
             </CardHeader>
             <CardContent className="pt-0 h-[280px] md:h-[250px]">
                  <ResponsiveContainer width="100%" height="100%">
@@ -166,3 +199,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
